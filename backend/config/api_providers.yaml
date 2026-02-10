@@ -1,0 +1,15 @@
+version: 1
+providers:
+  ai_extraction:
+    enabled: true
+    base_url: https://api.siliconflow.cn/v1
+    model: deepseek-ai/DeepSeek-V3.2
+    api_key: sk-jkjpfyjbughuffoqsrrheaeraefcxotzcvtrbrbksacnptgo
+    timeout_seconds: 15
+  ingestion:
+    stable_source_path: data/competition_source.json
+    fallback_source_path: data/competition_fallback.json
+    failure_threshold: 3
+    interval_seconds: 900
+  auth:
+    access_token_expire_minutes: 120
