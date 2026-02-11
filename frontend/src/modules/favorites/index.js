@@ -13,6 +13,7 @@ export default {
     {
       path: "/favorites",
       label: "收藏",
+      requiresAuth: true,
     },
   ],
 };

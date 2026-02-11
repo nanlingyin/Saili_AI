@@ -25,6 +25,19 @@ class User(Base):
     created_at = Column(DateTime, default=now_utc, nullable=False)
 
 
+class UserProfile(Base):
+    __tablename__ = "user_profiles"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False, index=True)
+    university = Column(String(255), default="")
+    major = Column(String(255), default="")
+    grade = Column(String(50), default="")
+    interest_tags = Column(String(500), default="")
+    bio = Column(Text, default="")
+    updated_at = Column(DateTime, default=now_utc, onupdate=now_utc, nullable=False)
+
+
 class Competition(Base):
     __tablename__ = "competitions"
 

@@ -13,6 +13,7 @@ export default {
     {
       path: "/recommendations",
       label: "推荐",
+      requiresAuth: true,
     },
   ],
 };

@@ -1,30 +1,32 @@
 <template>
-  <div class="app-shell">
-    <header class="app-header glass">
-      <div class="brand">
-        <div class="brand-mark">SA</div>
-        <div>
-          <div class="brand-title">SaiLi AI</div>
-          <div class="brand-subtitle">竞赛智能平台</div>
+  <div>
+    <nav class="site-nav">
+      <div class="site-nav-inner">
+        <router-link to="/" class="nav-brand">
+          <div class="nav-logo">SL</div>
+          <span>SaiLi AI</span>
+        </router-link>
+        <div class="nav-links">
+          <router-link
+            v-for="item in menuItems"
+            :key="item.path"
+            :to="item.path"
+            class="nav-link"
+            active-class="is-active"
+            exact-active-class=""
+          >
+            {{ item.label }}
+          </router-link>
+        </div>
+        <div class="nav-right">
+          <template v-if="loggedIn">
+            <span class="nav-username">{{ username }}</span>
+            <button class="nav-btn-logout" @click="handleLogout">退出</button>
+          </template>
         </div>
       </div>
-      <nav class="nav">
-        <router-link
-          v-for="item in menuItems"
-          :key="item.path"
-          :to="item.path"
-          class="nav-link"
-          active-class="is-active"
-        >
-          {{ item.label }}
-        </router-link>
-      </nav>
-      <div class="nav-meta">
-        <span class="status-dot"></span>
-        <span>本地预览</span>
-      </div>
-    </header>
-    <main class="app-main">
+    </nav>
+    <main class="site-main">
       <router-view />
     </main>
   </div>
@@ -32,7 +34,16 @@
 
 <script setup>
 import { computed } from "vue";
+import { useRouter } from "vue-router";
 import { getMenuItems } from "./menu";
+import { useAuth } from "./core/auth-store";
 
+const router = useRouter();
+const { loggedIn, username, logout } = useAuth();
 const menuItems = computed(() => getMenuItems());
+
+function handleLogout() {
+  logout();
+  router.push("/");
+}
 </script>

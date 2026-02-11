@@ -9,10 +9,5 @@ export default {
       component: SamplePage,
     },
   ],
-  menus: [
-    {
-      path: "/sample",
-      label: "示例模块",
-    },
-  ],
+  menus: [],
 };

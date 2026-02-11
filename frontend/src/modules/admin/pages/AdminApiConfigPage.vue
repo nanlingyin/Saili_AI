@@ -1,98 +1,87 @@
 <template>
   <section class="page">
-    <div class="panel">
-      <p class="eyebrow">配置中心</p>
+    <div class="page-header">
+      <p class="page-overline">配置中心</p>
       <h1 class="page-title">API 配置</h1>
-      <p class="page-subtitle">读取与修改 YAML 配置（管理员）。</p>
+      <p class="page-desc">读取与修改系统运行时配置（管理员）。</p>
     </div>
 
-    <div class="panel">
+    <div class="card">
       <h2 class="section-title">AI 抽取配置</h2>
-      <form class="form-grid" @submit.prevent="save">
+      <form class="form form-wide" @submit.prevent="save">
         <label class="field">
-          <span>启用 AI 抽取</span>
+          <span class="field-label">启用 AI 抽取</span>
           <select v-model="form.providers.ai_extraction.enabled" class="input">
             <option :value="true">启用</option>
             <option :value="false">关闭</option>
           </select>
         </label>
         <label class="field">
-          <span>API 地址</span>
+          <span class="field-label">API 地址</span>
           <input v-model="form.providers.ai_extraction.base_url" class="input" />
         </label>
         <label class="field">
-          <span>模型名</span>
+          <span class="field-label">模型名</span>
           <input v-model="form.providers.ai_extraction.model" class="input" />
         </label>
         <label class="field">
-          <span>API Key（留空保持不变）</span>
+          <span class="field-label">API Key（留空保持不变）</span>
           <input v-model="form.providers.ai_extraction.api_key" class="input" />
         </label>
         <label class="field">
-          <span>超时（秒）</span>
+          <span class="field-label">超时（秒）</span>
           <input v-model.number="form.providers.ai_extraction.timeout_seconds" class="input" type="number" min="1" />
         </label>
 
+        <hr class="divider" />
         <h2 class="section-title">入库配置</h2>
         <label class="field">
-          <span>主源文件路径</span>
+          <span class="field-label">主源文件路径</span>
           <input v-model="form.providers.ingestion.stable_source_path" class="input" />
         </label>
         <label class="field">
-          <span>兜底文件路径</span>
+          <span class="field-label">兜底文件路径</span>
           <input v-model="form.providers.ingestion.fallback_source_path" class="input" />
         </label>
         <label class="field">
-          <span>失败阈值</span>
+          <span class="field-label">失败阈值</span>
           <input v-model.number="form.providers.ingestion.failure_threshold" class="input" type="number" min="1" />
         </label>
         <label class="field">
-          <span>调度间隔（秒）</span>
+          <span class="field-label">调度间隔（秒）</span>
           <input v-model.number="form.providers.ingestion.interval_seconds" class="input" type="number" min="1" />
         </label>
 
+        <hr class="divider" />
         <h2 class="section-title">鉴权配置</h2>
         <label class="field">
-          <span>JWT 过期时间（分钟）</span>
+          <span class="field-label">JWT 过期时间（分钟）</span>
           <input v-model.number="form.providers.auth.access_token_expire_minutes" class="input" type="number" min="1" />
         </label>
 
-        <div class="hero-actions">
-          <button class="btn btn-ghost" type="button" @click="load">重新加载</button>
+        <div class="btn-group">
+          <button class="btn btn-secondary" type="button" @click="load">重新加载</button>
           <button class="btn btn-primary" type="submit">保存配置</button>
         </div>
       </form>
 
-      <p v-if="message" class="message">{{ message }}</p>
+      <div v-if="message" class="msg" :class="msgClass" style="margin-top: 16px">{{ message }}</div>
     </div>
   </section>
 </template>
 
 <script setup>
 import { onMounted, reactive, ref } from "vue";
-
 import { fetchApiProviders, updateApiProviders } from "../api";
 
 const message = ref("");
+const msgClass = ref("msg-success");
 const form = reactive({
   version: 1,
   providers: {
-    ai_extraction: {
-      enabled: false,
-      base_url: "",
-      model: "",
-      api_key: "",
-      timeout_seconds: 15,
-    },
-    ingestion: {
-      stable_source_path: "",
-      fallback_source_path: "",
-      failure_threshold: 3,
-      interval_seconds: 900,
-    },
-    auth: {
-      access_token_expire_minutes: 120,
-    },
+    ai_extraction: { enabled: false, base_url: "", model: "", api_key: "", timeout_seconds: 15 },
+    ingestion: { stable_source_path: "", fallback_source_path: "", failure_threshold: 3, interval_seconds: 900 },
+    auth: { access_token_expire_minutes: 120 },
   },
 });
 
@@ -117,6 +106,7 @@ async function load() {
     applyConfig(data);
   } catch (err) {
     message.value = err instanceof Error ? err.message : "加载配置失败";
+    msgClass.value = "msg-error";
   }
 }
 
@@ -127,8 +117,10 @@ async function save() {
     const saved = await updateApiProviders(payload);
     applyConfig(saved);
     message.value = "配置已保存";
+    msgClass.value = "msg-success";
   } catch (err) {
     message.value = err instanceof Error ? err.message : "保存失败";
+    msgClass.value = "msg-error";
   }
 }
 

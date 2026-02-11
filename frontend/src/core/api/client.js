@@ -30,9 +30,20 @@ export async function apiRequest(path, { method = "GET", body } = {}) {
     headers,
     body: body ? JSON.stringify(body) : undefined,
   });
+
   if (!response.ok) {
-    throw new Error(`request failed: ${response.status}`);
+    let message = `请求失败 (${response.status})`;
+    try {
+      const data = await response.json();
+      if (data.detail) {
+        message = typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail);
+      }
+    } catch {
+      // 无法解析响应体，使用默认消息
+    }
+    throw new Error(message);
   }
+
   return response.json();
 }
 

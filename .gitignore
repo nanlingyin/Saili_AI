@@ -22,6 +22,7 @@ backend/data/provider-config-*.yaml
 # IDE / OS
 .idea/
 .vscode/
+.claude/
 Thumbs.db
 .DS_Store
 

@@ -7,6 +7,7 @@ MODULE_PATHS = [
     "app.modules.favorites.module",
     "app.modules.reminders.module",
     "app.modules.recommendations.module",
+    "app.modules.profile.module",
     "app.modules.admin.module",
     "app.modules.sample.module",
 ]

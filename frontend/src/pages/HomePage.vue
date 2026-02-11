@@ -1,54 +1,46 @@
 <template>
   <section class="page">
-    <div class="panel hero">
-      <div>
-        <p class="eyebrow">SaiLi AI / V1</p>
-        <h1 class="page-title">把竞赛信息变成可行动的机会</h1>
-        <p class="page-subtitle">
-          聚合稳定数据源与人工录入，统一审核与发布流程，再用规则推荐与提醒，帮你把关键信息推进到下一步。
-        </p>
-        <div class="hero-actions">
-          <router-link class="btn btn-primary" to="/competitions">浏览竞赛</router-link>
-          <router-link class="btn btn-ghost" to="/recommendations">查看推荐</router-link>
-        </div>
-        <div class="chips">
-          <span class="chip">入库 + 审核</span>
-          <span class="chip">收藏订阅</span>
-          <span class="chip">邮件提醒</span>
-        </div>
-      </div>
-      <div class="hero-metrics">
-        <div class="metric-card">
-          <div class="metric-title">稳定数据源</div>
-          <div class="metric-value">1 条已接入</div>
-          <p class="page-subtitle">支持后台一键导入与去重更新。</p>
-        </div>
-        <div class="metric-card">
-          <div class="metric-title">规则推荐</div>
-          <div class="metric-value">V1 已启用</div>
-          <p class="page-subtitle">按标签、截止与热度打分排序。</p>
-        </div>
-        <div class="metric-card">
-          <div class="metric-title">审核流程</div>
-          <div class="metric-value">人工兜底</div>
-          <p class="page-subtitle">手动录入进入待审核后再发布。</p>
-        </div>
+    <div class="hero">
+      <p class="page-overline">竞赛智能平台</p>
+      <h1 class="page-title">发现适合你的竞赛</h1>
+      <p class="page-desc">
+        聚合校内外竞赛信息，结合你的专业与兴趣智能推荐，帮你把握每一个值得参与的机会。
+      </p>
+      <div class="btn-group">
+        <router-link class="btn btn-primary" to="/competitions">浏览竞赛</router-link>
+        <router-link v-if="!loggedIn" class="btn btn-secondary" to="/register">免费注册</router-link>
+        <router-link v-else class="btn btn-secondary" to="/recommendations">查看推荐</router-link>
       </div>
     </div>
 
-    <ul class="list-grid cols-3">
-      <li class="card">
-        <h3 class="card-title">竞赛库与筛选</h3>
-        <p class="page-subtitle">列表、详情、标签与关键词搜索，让信息可检索。</p>
-      </li>
-      <li class="card">
-        <h3 class="card-title">收藏与订阅</h3>
-        <p class="page-subtitle">关注竞赛或标签，形成你的长期信息池。</p>
-      </li>
-      <li class="card">
-        <h3 class="card-title">提醒与推荐</h3>
-        <p class="page-subtitle">按规则打分与截止提醒，让机会可触达。</p>
-      </li>
-    </ul>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">01</div>
+        <h3 class="feature-title">竞赛聚合</h3>
+        <p class="feature-desc">
+          整合多渠道竞赛数据，统一格式与审核流程，支持关键词与标签筛选。
+        </p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">02</div>
+        <h3 class="feature-title">智能推荐</h3>
+        <p class="feature-desc">
+          根据你的专业、兴趣与订阅偏好，自动匹配并推荐最相关的竞赛。
+        </p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">03</div>
+        <h3 class="feature-title">收藏与提醒</h3>
+        <p class="feature-desc">
+          一键收藏感兴趣的竞赛，报名截止前自动发送邮件提醒，不再错过。
+        </p>
+      </div>
+    </div>
   </section>
 </template>
+
+<script setup>
+import { useAuth } from "../core/auth-store";
+
+const { loggedIn } = useAuth();
+</script>

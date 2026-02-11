@@ -19,10 +19,7 @@ export default {
     {
       path: "/admin",
       label: "管理后台",
-    },
-    {
-      path: "/admin/api-config",
-      label: "API 配置",
+      requiresAdmin: true,
     },
   ],
 };
