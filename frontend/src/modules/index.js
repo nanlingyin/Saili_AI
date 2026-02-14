@@ -3,6 +3,7 @@ import adminModule from "./admin";
 import authModule from "./auth";
 import competitionsModule from "./competitions";
 import favoritesModule from "./favorites";
+import matchModule from "./match";
 import profileModule from "./profile";
 import recommendationsModule from "./recommendations";
 import sampleModule from "./sample";
@@ -10,6 +11,7 @@ import sampleModule from "./sample";
 export function registerModules() {
   registerModule(authModule);
   registerModule(competitionsModule);
+  registerModule(matchModule);
   registerModule(favoritesModule);
   registerModule(recommendationsModule);
   registerModule(profileModule);

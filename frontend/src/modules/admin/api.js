@@ -28,3 +28,11 @@ export function fetchApiProviders() {
 export function updateApiProviders(payload) {
   return apiPut("/admin/config/api-providers", payload);
 }
+
+export function crawlRefresh() {
+  return apiPost("/admin/crawl/refresh");
+}
+
+export function crawlStatus() {
+  return apiGet("/admin/crawl/status");
+}

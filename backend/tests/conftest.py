@@ -17,6 +17,7 @@ os.environ["DATABASE_URL"] = f"sqlite:///{TEST_DB_PATH.as_posix()}"
 os.environ["JWT_SECRET"] = "test-secret"
 os.environ["ENABLE_REMINDER_SCHEDULER"] = "false"
 os.environ["ENABLE_INGEST_SCHEDULER"] = "false"
+os.environ["SKIP_SEED"] = "1"
 os.environ["STABLE_SOURCE_PATH"] = TEST_SOURCE_PATH.as_posix()
 os.environ["FALLBACK_SOURCE_PATH"] = TEST_FALLBACK_SOURCE_PATH.as_posix()
 os.environ["API_PROVIDER_CONFIG_PATH"] = TEST_PROVIDER_CONFIG_PATH.as_posix()

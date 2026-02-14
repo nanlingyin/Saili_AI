@@ -34,6 +34,20 @@
         <div class="detail-label">参赛要求</div>
         <div class="detail-value">{{ competition.requirements }}</div>
       </div>
+      <div class="detail-item" v-if="competition.url">
+        <div class="detail-label">官网</div>
+        <div class="detail-value">
+          <a :href="competition.url" target="_blank" rel="noopener" style="color:var(--color-primary)">{{ competition.url }} ↗</a>
+        </div>
+      </div>
+      <div class="detail-item" v-if="competition.crawl_status">
+        <div class="detail-label">抓取状态</div>
+        <div class="detail-value">{{ competition.crawl_status }}</div>
+      </div>
+      <div class="detail-item" v-if="competition.last_crawled">
+        <div class="detail-label">最近抓取</div>
+        <div class="detail-value">{{ formatDate(competition.last_crawled) }}</div>
+      </div>
     </div>
 
     <div class="btn-group">

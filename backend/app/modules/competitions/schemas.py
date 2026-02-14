@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 
 class CompetitionBase(BaseModel):
     title: str
+    url: Optional[str] = ""
     description: Optional[str] = None
     organizer: Optional[str] = None
     location: Optional[str] = None
@@ -24,6 +25,7 @@ class CompetitionCreate(CompetitionBase):
 
 class CompetitionUpdate(BaseModel):
     title: Optional[str] = None
+    url: Optional[str] = None
     description: Optional[str] = None
     organizer: Optional[str] = None
     location: Optional[str] = None
@@ -41,6 +43,10 @@ class CompetitionOut(CompetitionBase):
     id: int
     status: str
     source: str
+    crawl_status: Optional[str] = ""
+    crawl_error: Optional[str] = ""
+    source_title: Optional[str] = ""
+    last_crawled: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
 

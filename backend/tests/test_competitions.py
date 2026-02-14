@@ -1,5 +1,6 @@
 
 def test_competition_list_after_publish(client):
+    website = "https://example.com/contest"
     login = client.post(
         "/api/v1/auth/login",
         json={"username": "admin", "password": "admin123"},
@@ -11,12 +12,14 @@ def test_competition_list_after_publish(client):
         "/api/v1/admin/competitions",
         json={
             "title": "测试竞赛",
+            "url": website,
             "description": "描述",
             "tags": ["英语"],
         },
         headers=headers,
     )
     assert create.status_code == 200
+    assert create.json()["url"] == website
     competition_id = create.json()["id"]
 
     publish = client.post(
@@ -29,3 +32,4 @@ def test_competition_list_after_publish(client):
     assert listing.status_code == 200
     items = listing.json()["items"]
     assert len(items) == 1
+    assert items[0]["url"] == website

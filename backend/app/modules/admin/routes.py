@@ -6,7 +6,8 @@ from sqlalchemy.orm import Session
 
 from app.core.auth import require_admin
 from app.core.config import EMAIL_ENABLED
-from app.core.db import get_db
+from app.core.crawler import get_refresh_state, trigger_refresh
+from app.core.db import SessionLocal, get_db
 from app.core.ingestion import ensure_default_sources, list_source_metrics, run_ingestion_sync
 from app.core.models import Competition, RecommendationRule, User
 from app.core.provider_config import load_provider_config, save_provider_config
@@ -64,6 +65,7 @@ def to_out(competition: Competition) -> CompetitionOut:
     return CompetitionOut(
         id=competition.id,
         title=competition.title,
+        url=competition.url or "",
         description=competition.description,
         organizer=competition.organizer,
         location=competition.location,
@@ -76,6 +78,10 @@ def to_out(competition: Competition) -> CompetitionOut:
         tags=tags_from_string(competition.tags),
         status=competition.status,
         source=competition.source,
+        crawl_status=competition.crawl_status or "",
+        crawl_error=competition.crawl_error or "",
+        source_title=competition.source_title or "",
+        last_crawled=competition.last_crawled,
         created_at=competition.created_at,
         updated_at=competition.updated_at,
     )
@@ -101,6 +107,7 @@ def create_competition(
 ) -> CompetitionOut:
     competition = Competition(
         title=payload.title,
+        url=payload.url or "",
         description=payload.description,
         organizer=payload.organizer,
         location=payload.location,
@@ -270,3 +277,21 @@ def send_due_reminders(
         raise HTTPException(status_code=400, detail="email not configured")
     sent = run_due_reminders(db)
     return {"sent": sent}
+
+
+@router.post("/crawl/refresh")
+def crawl_refresh(
+    admin: User = Depends(require_admin),
+) -> dict:
+    started = trigger_refresh(db_factory=SessionLocal, reason="manual")
+    return {
+        "started": started,
+        "message": "已启动抓取任务" if started else "已有抓取任务在运行中",
+    }
+
+
+@router.get("/crawl/status")
+def crawl_status(
+    admin: User = Depends(require_admin),
+) -> dict:
+    return get_refresh_state()

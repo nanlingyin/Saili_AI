@@ -19,6 +19,7 @@ def to_out(competition: Competition) -> CompetitionOut:
     return CompetitionOut(
         id=competition.id,
         title=competition.title,
+        url=competition.url or "",
         description=competition.description,
         organizer=competition.organizer,
         location=competition.location,
@@ -31,6 +32,10 @@ def to_out(competition: Competition) -> CompetitionOut:
         tags=tags_from_string(competition.tags),
         status=competition.status,
         source=competition.source,
+        crawl_status=competition.crawl_status or "",
+        crawl_error=competition.crawl_error or "",
+        source_title=competition.source_title or "",
+        last_crawled=competition.last_crawled,
         created_at=competition.created_at,
         updated_at=competition.updated_at,
     )

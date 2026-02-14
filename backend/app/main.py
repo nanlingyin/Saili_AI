@@ -16,7 +16,7 @@ from app.core.logging import setup_logging
 from app.core.module_loader import load_modules
 from app.core.provider_config import ensure_provider_config_file, get_runtime_ingestion_config
 from app.core.scheduler import start_ingestion_scheduler, start_reminder_scheduler
-from app.core.seed import ensure_default_admin
+from app.core.seed import ensure_default_admin, seed_competitions
 from app.core.api.health import router as health_router
 
 
@@ -26,6 +26,7 @@ def create_app() -> FastAPI:
     init_db()
     with SessionLocal() as db:
         ensure_default_admin(db)
+        seed_competitions(db)
         ensure_default_sources(db)
 
     app = FastAPI(title="SaiLi AI", version="0.1.0")

@@ -45,6 +45,7 @@ class Competition(Base):
     external_id = Column(String(100), unique=True)
     source = Column(String(50), default="manual", nullable=False)
     title = Column(String(255), nullable=False)
+    url = Column(String(500), default="")
     description = Column(Text)
     organizer = Column(String(255))
     location = Column(String(255))
@@ -56,6 +57,10 @@ class Competition(Base):
     requirements = Column(Text)
     tags = Column(String(255))
     status = Column(String(20), default="pending", nullable=False)
+    crawl_status = Column(String(20), default="")
+    crawl_error = Column(Text, default="")
+    source_title = Column(String(255), default="")
+    last_crawled = Column(DateTime)
     created_at = Column(DateTime, default=now_utc, nullable=False)
     updated_at = Column(DateTime, default=now_utc, onupdate=now_utc, nullable=False)
 

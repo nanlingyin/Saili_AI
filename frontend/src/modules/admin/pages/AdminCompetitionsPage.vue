@@ -8,10 +8,35 @@
 
     <div class="btn-group">
       <button class="btn btn-primary" @click="handleIngest">导入数据源</button>
+      <button class="btn btn-secondary" @click="handleCrawl" :disabled="crawling">
+        {{ crawling ? '抓取中...' : '🕷️ 抓取竞赛官网' }}
+      </button>
       <router-link class="btn btn-secondary" to="/admin/api-config">API 配置</router-link>
     </div>
 
     <div v-if="message" class="msg" :class="msgClass">{{ message }}</div>
+
+    <div v-if="crawlInfo" class="card" style="margin-bottom:12px">
+      <h2 class="section-title">🕷️ 爬虫状态</h2>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <div class="detail-label">状态</div>
+          <div class="detail-value">{{ crawlInfo.running ? '运行中' : '空闲' }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">进度</div>
+          <div class="detail-value">{{ crawlInfo.progress_done }} / {{ crawlInfo.progress_total }}</div>
+        </div>
+        <div class="detail-item" v-if="crawlInfo.reason">
+          <div class="detail-label">触发原因</div>
+          <div class="detail-value">{{ crawlInfo.reason }}</div>
+        </div>
+        <div class="detail-item" v-if="crawlInfo.finished_at">
+          <div class="detail-label">完成时间</div>
+          <div class="detail-value">{{ crawlInfo.finished_at }}</div>
+        </div>
+      </div>
+    </div>
 
     <div class="card">
       <h2 class="section-title">待审核竞赛</h2>
@@ -50,12 +75,21 @@
 
 <script setup>
 import { onMounted, reactive, ref } from "vue";
-import { createCompetition, fetchCompetitions, ingestSource, publishCompetition } from "../api";
+import {
+  crawlRefresh,
+  crawlStatus,
+  createCompetition,
+  fetchCompetitions,
+  ingestSource,
+  publishCompetition,
+} from "../api";
 
 const pending = ref([]);
 const message = ref("");
 const msgClass = ref("msg-success");
 const form = reactive({ title: "", organizer: "", tags: "" });
+const crawling = ref(false);
+const crawlInfo = ref(null);
 
 async function load() {
   pending.value = await fetchCompetitions("pending");
@@ -99,5 +133,50 @@ async function handleCreate() {
   }
 }
 
-onMounted(load);
+async function handleCrawl() {
+  message.value = "";
+  crawling.value = true;
+  try {
+    const res = await crawlRefresh();
+    message.value = res.message || "已启动抓取";
+    msgClass.value = "msg-success";
+    // 轮询爬虫状态
+    pollCrawlStatus();
+  } catch (err) {
+    message.value = err instanceof Error ? err.message : "抓取失败";
+    msgClass.value = "msg-error";
+    crawling.value = false;
+  }
+}
+
+let pollTimer = null;
+async function pollCrawlStatus() {
+  try {
+    const info = await crawlStatus();
+    crawlInfo.value = info;
+    if (info.running) {
+      pollTimer = setTimeout(pollCrawlStatus, 2000);
+    } else {
+      crawling.value = false;
+      await load();
+    }
+  } catch {
+    crawling.value = false;
+  }
+}
+
+async function loadCrawlInfo() {
+  try {
+    crawlInfo.value = await crawlStatus();
+    if (crawlInfo.value?.running) {
+      crawling.value = true;
+      pollCrawlStatus();
+    }
+  } catch { /* ignore */ }
+}
+
+onMounted(() => {
+  load();
+  loadCrawlInfo();
+});
 </script>

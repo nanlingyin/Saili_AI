@@ -9,6 +9,7 @@ MODULE_PATHS = [
     "app.modules.recommendations.module",
     "app.modules.profile.module",
     "app.modules.admin.module",
+    "app.modules.match.module",
     "app.modules.sample.module",
 ]
 
@@ -65,3 +66,7 @@ API_PROVIDER_CONFIG_PATH = os.getenv(
     "API_PROVIDER_CONFIG_PATH",
     "config/api_providers.yaml",
 )
+
+COMPETITIONS_SEED_PATH = os.getenv("COMPETITIONS_SEED_PATH", "data/competitions_seed.json")
+CRAWL_MAX_WORKERS = int(os.getenv("CRAWL_MAX_WORKERS", "12"))
+CRAWL_TIMEOUT_SECONDS = float(os.getenv("CRAWL_TIMEOUT_SECONDS", "12"))

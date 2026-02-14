@@ -114,6 +114,7 @@ def list_recommendations(
         CompetitionOut(
             id=item.id,
             title=item.title,
+            url=item.url or "",
             description=item.description,
             organizer=item.organizer,
             location=item.location,
@@ -126,6 +127,10 @@ def list_recommendations(
             tags=tags_from_string(item.tags),
             status=item.status,
             source=item.source,
+            crawl_status=item.crawl_status or "",
+            crawl_error=item.crawl_error or "",
+            source_title=item.source_title or "",
+            last_crawled=item.last_crawled,
             created_at=item.created_at,
             updated_at=item.updated_at,
         )
