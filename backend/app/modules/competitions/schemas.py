@@ -6,6 +6,8 @@ from pydantic import BaseModel, Field
 
 class CompetitionBase(BaseModel):
     title: str
+    level: Optional[str] = "national"
+    school: Optional[str] = "ALL"
     description: Optional[str] = None
     organizer: Optional[str] = None
     location: Optional[str] = None
@@ -15,6 +17,7 @@ class CompetitionBase(BaseModel):
     event_end: Optional[datetime] = None
     reward: Optional[str] = None
     requirements: Optional[str] = None
+    contact_note: Optional[str] = None
     tags: List[str] = Field(default_factory=list)
 
 
@@ -24,6 +27,8 @@ class CompetitionCreate(CompetitionBase):
 
 class CompetitionUpdate(BaseModel):
     title: Optional[str] = None
+    level: Optional[str] = None
+    school: Optional[str] = None
     description: Optional[str] = None
     organizer: Optional[str] = None
     location: Optional[str] = None
@@ -33,6 +38,7 @@ class CompetitionUpdate(BaseModel):
     event_end: Optional[datetime] = None
     reward: Optional[str] = None
     requirements: Optional[str] = None
+    contact_note: Optional[str] = None
     tags: Optional[List[str]] = None
     status: Optional[str] = None
 

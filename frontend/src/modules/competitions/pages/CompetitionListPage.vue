@@ -16,6 +16,14 @@
           <span class="field-label">标签</span>
           <input v-model="tag" class="input" placeholder="如：编程" />
         </label>
+        <label class="field">
+          <span class="field-label">认可类型</span>
+          <select v-model="level" class="input">
+            <option value="">全部</option>
+            <option value="national">国家认可</option>
+            <option value="school">学校认可</option>
+          </select>
+        </label>
         <button class="btn btn-primary btn-sm" @click="load">搜索</button>
       </div>
     </div>
@@ -27,6 +35,8 @@
         </router-link>
         <p class="card-meta">{{ item.organizer || "未提供主办方" }}</p>
         <p class="card-meta">报名截止：{{ formatDate(item.signup_end) }}</p>
+        <p class="card-meta">认可：{{ item.level === "school" ? "学校认可" : "国家认可" }}</p>
+        <p class="card-meta" v-if="item.contact_note">备注：{{ item.contact_note }}</p>
         <div class="tags" v-if="item.tags?.length">
           <span v-for="t in item.tags" :key="t" class="tag">{{ t }}</span>
         </div>
@@ -39,11 +49,13 @@
 
 <script setup>
 import { onMounted, ref } from "vue";
-import { fetchCompetitions } from "../api";
+import { useCompetitionsApi } from "../api";
 
+const { fetchCompetitions } = useCompetitionsApi();
 const items = ref([]);
 const query = ref("");
 const tag = ref("");
+const level = ref("");
 
 function formatDate(value) {
   if (!value) return "--";
@@ -54,6 +66,7 @@ async function load() {
   const data = await fetchCompetitions({
     q: query.value || undefined,
     tag: tag.value || undefined,
+    level: level.value || undefined,
   });
   items.value = data.items || [];
 }

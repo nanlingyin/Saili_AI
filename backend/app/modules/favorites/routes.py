@@ -39,6 +39,8 @@ def list_favorites(
         CompetitionOut(
             id=item.id,
             title=item.title,
+            level=item.level,
+            school=item.school,
             description=item.description,
             organizer=item.organizer,
             location=item.location,
@@ -48,6 +50,7 @@ def list_favorites(
             event_end=item.event_end,
             reward=item.reward,
             requirements=item.requirements,
+            contact_note=item.contact_note,
             tags=tags_from_string(item.tags),
             status=item.status,
             source=item.source,

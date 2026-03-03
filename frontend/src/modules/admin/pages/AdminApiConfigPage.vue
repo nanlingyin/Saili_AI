@@ -2,12 +2,12 @@
   <section class="page">
     <div class="page-header">
       <p class="page-overline">配置中心</p>
-      <h1 class="page-title">API 配置</h1>
-      <p class="page-desc">读取与修改系统运行时配置（管理员）。</p>
+      <h1 class="page-title">系统配置与运营动作</h1>
+      <p class="page-desc">管理 AI 抽取、入库、鉴权参数，并可在线调整推荐规则和触发提醒。</p>
     </div>
 
     <div class="card">
-      <h2 class="section-title">AI 抽取配置</h2>
+      <h2 class="section-title">API Providers</h2>
       <form class="form form-wide" @submit.prevent="save">
         <label class="field">
           <span class="field-label">启用 AI 抽取</span>
@@ -34,7 +34,7 @@
         </label>
 
         <hr class="divider" />
-        <h2 class="section-title">入库配置</h2>
+
         <label class="field">
           <span class="field-label">主源文件路径</span>
           <input v-model="form.providers.ingestion.stable_source_path" class="input" />
@@ -53,7 +53,7 @@
         </label>
 
         <hr class="divider" />
-        <h2 class="section-title">鉴权配置</h2>
+
         <label class="field">
           <span class="field-label">JWT 过期时间（分钟）</span>
           <input v-model.number="form.providers.auth.access_token_expire_minutes" class="input" type="number" min="1" />
@@ -64,16 +64,36 @@
           <button class="btn btn-primary" type="submit">保存配置</button>
         </div>
       </form>
-
-      <div v-if="message" class="msg" :class="msgClass" style="margin-top: 16px">{{ message }}</div>
     </div>
+
+    <div class="card">
+      <h2 class="section-title">推荐规则权重</h2>
+      <p class="section-subtitle">用于更新后端推荐规则（tag_match / deadline_soon / new_competition / major_match / interest_match）。</p>
+      <form class="form form-wide" @submit.prevent="saveRules">
+        <label class="field" v-for="rule in recommendationRules" :key="rule.key">
+          <span class="field-label">{{ rule.key }}</span>
+          <input v-model.number="rule.weight" class="input" type="number" />
+        </label>
+        <button class="btn btn-primary" type="submit">保存推荐权重</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">提醒任务</h2>
+      <p class="section-subtitle">手动触发到期提醒邮件发送（需后端 SMTP 已配置）。</p>
+      <button class="btn btn-secondary" @click="handleSendReminders">立即发送提醒</button>
+    </div>
+
+    <div v-if="message" class="msg" :class="msgClass">{{ message }}</div>
   </section>
 </template>
 
 <script setup>
 import { onMounted, reactive, ref } from "vue";
-import { fetchApiProviders, updateApiProviders } from "../api";
 
+import { useAdminApi } from "../api";
+
+const { fetchApiProviders, updateApiProviders, updateRecommendationRules, sendDueReminders } = useAdminApi();
 const message = ref("");
 const msgClass = ref("msg-success");
 const form = reactive({
@@ -84,6 +104,24 @@ const form = reactive({
     auth: { access_token_expire_minutes: 120 },
   },
 });
+
+const recommendationRules = reactive([
+  { key: "tag_match", weight: 10 },
+  { key: "deadline_soon", weight: 3 },
+  { key: "new_competition", weight: 2 },
+  { key: "major_match", weight: 5 },
+  { key: "interest_match", weight: 8 },
+]);
+
+function ok(text) {
+  message.value = text;
+  msgClass.value = "msg-success";
+}
+
+function fail(err, fallback) {
+  message.value = err instanceof Error ? err.message : fallback;
+  msgClass.value = "msg-error";
+}
 
 function applyConfig(payload) {
   form.version = payload.version ?? 1;
@@ -105,8 +143,7 @@ async function load() {
     const data = await fetchApiProviders();
     applyConfig(data);
   } catch (err) {
-    message.value = err instanceof Error ? err.message : "加载配置失败";
-    msgClass.value = "msg-error";
+    fail(err, "加载配置失败");
   }
 }
 
@@ -116,11 +153,34 @@ async function save() {
     const payload = JSON.parse(JSON.stringify(form));
     const saved = await updateApiProviders(payload);
     applyConfig(saved);
-    message.value = "配置已保存";
-    msgClass.value = "msg-success";
+    ok("配置已保存");
   } catch (err) {
-    message.value = err instanceof Error ? err.message : "保存失败";
-    msgClass.value = "msg-error";
+    fail(err, "保存配置失败");
+  }
+}
+
+async function saveRules() {
+  message.value = "";
+  try {
+    await updateRecommendationRules(
+      recommendationRules.map((rule) => ({
+        key: rule.key,
+        weight: Number(rule.weight),
+      })),
+    );
+    ok("推荐规则权重已更新");
+  } catch (err) {
+    fail(err, "保存推荐权重失败");
+  }
+}
+
+async function handleSendReminders() {
+  message.value = "";
+  try {
+    const data = await sendDueReminders();
+    ok(`提醒发送完成：${data.sent} 封`);
+  } catch (err) {
+    fail(err, "触发提醒失败");
   }
 }
 

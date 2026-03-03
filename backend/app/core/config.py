@@ -1,18 +1,48 @@
 import os
+from pathlib import Path
 
 API_PREFIX = "/api/v1"
 MODULE_PATHS = [
     "app.modules.auth.module",
     "app.modules.competitions.module",
+    "app.modules.teams.module",
+    "app.modules.resume.module",
     "app.modules.favorites.module",
     "app.modules.reminders.module",
     "app.modules.recommendations.module",
     "app.modules.profile.module",
     "app.modules.admin.module",
     "app.modules.sample.module",
+    "app.modules.forum.module",
 ]
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./data/app.db")
+BACKEND_DIR = Path(__file__).resolve().parents[2]
+
+
+def _resolve_backend_path(path_value: str) -> str:
+    path = Path(path_value)
+    if path.is_absolute():
+        return str(path)
+    return str((BACKEND_DIR / path).resolve())
+
+
+def _normalize_database_url(db_url: str) -> str:
+    if not db_url.startswith("sqlite:///"):
+        return db_url
+
+    sqlite_path = db_url.replace("sqlite:///", "", 1)
+    if sqlite_path == ":memory:":
+        return db_url
+
+    path = Path(sqlite_path)
+    if path.is_absolute():
+        return db_url
+    return f"sqlite:///{_resolve_backend_path(sqlite_path)}"
+
+
+DATABASE_URL = _normalize_database_url(
+    os.getenv("DATABASE_URL", f"sqlite:///{_resolve_backend_path('data/app.db')}")
+)
 
 JWT_SECRET = os.getenv("JWT_SECRET", "change-me")
 JWT_ALGORITHM = "HS256"
@@ -36,8 +66,12 @@ ENABLE_INGEST_SCHEDULER = (
 )
 INGEST_INTERVAL_SECONDS = int(os.getenv("INGEST_INTERVAL_SECONDS", "900"))
 
-STABLE_SOURCE_PATH = os.getenv("STABLE_SOURCE_PATH", "data/competition_source.json")
-FALLBACK_SOURCE_PATH = os.getenv("FALLBACK_SOURCE_PATH", "data/competition_fallback.json")
+STABLE_SOURCE_PATH = _resolve_backend_path(
+    os.getenv("STABLE_SOURCE_PATH", "data/competition_source.json")
+)
+FALLBACK_SOURCE_PATH = _resolve_backend_path(
+    os.getenv("FALLBACK_SOURCE_PATH", "data/competition_fallback.json")
+)
 INGEST_FAILURE_THRESHOLD = int(os.getenv("INGEST_FAILURE_THRESHOLD", "3"))
 
 AI_API_BASE_URL = os.getenv("AI_API_BASE_URL", "")
@@ -58,10 +92,11 @@ else:
 
 CORS_ORIGIN_REGEX = os.getenv(
     "CORS_ORIGIN_REGEX",
-    r"^https?://(localhost|127\.0\.0\.1|0\.0\.0\.0)(:\d+)?$",
+    r"^https?://([A-Za-z0-9\.-]+|(\d{1,3}\.){3}\d{1,3})(:\d+)?$",
 )
 
 API_PROVIDER_CONFIG_PATH = os.getenv(
     "API_PROVIDER_CONFIG_PATH",
-    "config/api_providers.yaml",
+    _resolve_backend_path("config/api_providers.yaml"),
 )
+API_PROVIDER_CONFIG_PATH = _resolve_backend_path(API_PROVIDER_CONFIG_PATH)

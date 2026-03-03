@@ -12,8 +12,9 @@
 <script setup>
 import { onMounted, ref } from "vue";
 
-import { fetchHello } from "../api";
+import { useSampleApi } from "../api";
 
+const { fetchHello } = useSampleApi();
 const message = ref("加载中...");
 const error = ref("");
 

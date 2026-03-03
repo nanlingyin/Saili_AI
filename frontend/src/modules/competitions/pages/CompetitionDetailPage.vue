@@ -11,6 +11,10 @@
 
     <div class="detail-grid">
       <div class="detail-item">
+        <div class="detail-label">认可类型</div>
+        <div class="detail-value">{{ competition.level === "school" ? "学校认可" : "国家认可" }}</div>
+      </div>
+      <div class="detail-item">
         <div class="detail-label">主办方</div>
         <div class="detail-value">{{ competition.organizer || "未提供" }}</div>
       </div>
@@ -34,10 +38,17 @@
         <div class="detail-label">参赛要求</div>
         <div class="detail-value">{{ competition.requirements }}</div>
       </div>
+      <div class="detail-item" v-if="competition.contact_note">
+        <div class="detail-label">比赛备注</div>
+        <div class="detail-value">{{ competition.contact_note }}</div>
+      </div>
     </div>
 
     <div class="btn-group">
       <button class="btn btn-primary" @click="toggleFavorite">收藏此竞赛</button>
+      <button v-if="loggedIn" class="btn btn-secondary" @click="handleEnroll">报名参赛</button>
+      <button v-if="loggedIn" class="btn btn-secondary" @click="handleSubmit">提交作品</button>
+      <router-link v-else class="btn btn-secondary" to="/login">登录后报名</router-link>
       <router-link class="btn btn-secondary" to="/competitions">返回列表</router-link>
     </div>
 
@@ -51,9 +62,12 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
-import { fetchCompetition } from "../api";
+import { useCompetitionsApi } from "../api";
 import { addFavorite } from "../../favorites/api";
+import { useAuth } from "../../../core/auth-store";
 
+const { fetchCompetition, enrollCompetition, submitCompetition } = useCompetitionsApi();
+const { loggedIn } = useAuth();
 const route = useRoute();
 const competition = ref(null);
 const message = ref("");
@@ -77,6 +91,32 @@ async function toggleFavorite() {
     msgClass.value = "msg-success";
   } catch (err) {
     message.value = err instanceof Error ? err.message : "操作失败";
+    msgClass.value = "msg-error";
+  }
+}
+
+async function handleEnroll() {
+  if (!competition.value) return;
+  message.value = "";
+  try {
+    const data = await enrollCompetition(competition.value.id);
+    message.value = data.status === "registered" ? "报名成功" : `当前状态：${data.status}`;
+    msgClass.value = "msg-success";
+  } catch (err) {
+    message.value = err instanceof Error ? err.message : "报名失败";
+    msgClass.value = "msg-error";
+  }
+}
+
+async function handleSubmit() {
+  if (!competition.value) return;
+  message.value = "";
+  try {
+    const data = await submitCompetition(competition.value.id);
+    message.value = data.status === "submitted" ? "提交成功" : `当前状态：${data.status}`;
+    msgClass.value = "msg-success";
+  } catch (err) {
+    message.value = err instanceof Error ? err.message : "提交失败";
     msgClass.value = "msg-error";
   }
 }

@@ -44,10 +44,11 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref } from "vue";
-import { getProfile, updateProfile } from "../api";
+import { useProfileApi } from "../api";
 import { useAuth } from "../../../core/auth-store";
 
 const { loggedIn } = useAuth();
+const { getProfile, updateProfile } = useProfileApi();
 
 const form = reactive({
   university: "",

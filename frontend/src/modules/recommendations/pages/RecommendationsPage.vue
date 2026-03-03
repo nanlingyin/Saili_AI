@@ -37,10 +37,11 @@
 
 <script setup>
 import { onMounted, ref } from "vue";
-import { fetchRecommendations } from "../api";
+import { useRecommendationsApi } from "../api";
 import { useAuth } from "../../../core/auth-store";
 
 const { loggedIn } = useAuth();
+const { fetchRecommendations } = useRecommendationsApi();
 const items = ref([]);
 
 function formatDate(value) {

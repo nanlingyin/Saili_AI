@@ -7,3 +7,10 @@ export function getProfile() {
 export function updateProfile(payload) {
   return apiPut("/profile", payload);
 }
+
+export function useProfileApi() {
+  return {
+    getProfile,
+    updateProfile,
+  };
+}

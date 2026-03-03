@@ -15,6 +15,15 @@ export const authStore = {
   get isAdmin() {
     return state.user?.is_admin === true;
   },
+  get role() {
+    return state.user?.role || "student";
+  },
+  get school() {
+    return state.user?.school || "";
+  },
+  get isSchoolManager() {
+    return state.user?.is_admin === true || ["school_admin", "student_admin"].includes(state.user?.role);
+  },
   get username() {
     return state.user?.username || "";
   },
@@ -39,6 +48,9 @@ export function useAuth() {
     loggedIn: computed(() => authStore.loggedIn),
     user: computed(() => authStore.user),
     isAdmin: computed(() => authStore.isAdmin),
+    role: computed(() => authStore.role),
+    school: computed(() => authStore.school),
+    isSchoolManager: computed(() => authStore.isSchoolManager),
     username: computed(() => authStore.username),
     login: authStore.login,
     logout: authStore.logout,

@@ -17,6 +17,10 @@
           <input v-model="form.email" class="input" type="email" required />
         </label>
         <label class="field">
+          <span class="field-label">学校（可选）</span>
+          <input v-model="form.school" class="input" placeholder="示例：清华大学" />
+        </label>
+        <label class="field">
           <span class="field-label">密码</span>
           <input v-model="form.password" class="input" type="password" required />
         </label>
@@ -40,10 +44,11 @@
 <script setup>
 import { reactive, ref } from "vue";
 import { useRouter } from "vue-router";
-import { register } from "../api";
+import { useAuthApi } from "../api";
 
 const router = useRouter();
-const form = reactive({ username: "", email: "", password: "", confirmPassword: "" });
+const { register } = useAuthApi();
+const form = reactive({ username: "", email: "", school: "", password: "", confirmPassword: "" });
 const error = ref("");
 const success = ref("");
 
@@ -51,6 +56,17 @@ async function handleRegister() {
   error.value = "";
   success.value = "";
 
+  const username = form.username.trim();
+  const email = form.email.trim();
+
+  if (!username) {
+    error.value = "用户名不能为空";
+    return;
+  }
+  if (!email) {
+    error.value = "邮箱不能为空";
+    return;
+  }
   if (form.password !== form.confirmPassword) {
     error.value = "两次密码输入不一致";
     return;
@@ -58,11 +74,13 @@ async function handleRegister() {
 
   try {
     await register({
-      username: form.username,
-      email: form.email,
+      username,
+      email,
+      school: form.school?.trim() || undefined,
       password: form.password,
     });
     success.value = "注册成功，即将跳转登录";
+    form.school = "";
     setTimeout(() => router.push("/login"), 1200);
   } catch (err) {
     error.value = err instanceof Error ? err.message : "注册失败";

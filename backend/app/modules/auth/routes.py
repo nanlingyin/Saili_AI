@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
-from app.core.auth import get_current_user
+from app.core.auth import get_current_user, get_user_role
 from app.core.db import get_db
 from app.core.models import ReminderSetting, User
 from app.core.security import create_access_token, hash_password, verify_password
@@ -14,6 +15,7 @@ class UserCreate(BaseModel):
     username: str
     email: str
     password: str
+    school: str | None = None
 
 
 class LoginRequest(BaseModel):
@@ -27,6 +29,8 @@ class TokenResponse(BaseModel):
     user_id: int
     username: str
     is_admin: bool
+    role: str
+    school: str
 
 
 class UserResponse(BaseModel):
@@ -34,20 +38,44 @@ class UserResponse(BaseModel):
     username: str
     email: str
     is_admin: bool
+    role: str
+    school: str
+
+
+def _to_user_response(user: User) -> UserResponse:
+    return UserResponse(
+        id=user.id,
+        username=user.username,
+        email=user.email,
+        is_admin=user.is_admin,
+        role=get_user_role(user),
+        school=user.school or "",
+    )
 
 
 @router.post("/register", response_model=UserResponse)
 def register(payload: UserCreate, db: Session = Depends(get_db)) -> UserResponse:
-    if db.query(User).filter(User.username == payload.username).first():
+    username = payload.username.strip()
+    email = payload.email.strip().lower()
+    school = (payload.school or "").strip()
+
+    if not username:
+        raise HTTPException(status_code=400, detail="invalid username")
+    if not email:
+        raise HTTPException(status_code=400, detail="invalid email")
+
+    if db.query(User).filter(func.lower(User.username) == username.lower()).first():
         raise HTTPException(status_code=400, detail="username already exists")
-    if db.query(User).filter(User.email == payload.email).first():
+    if db.query(User).filter(func.lower(User.email) == email).first():
         raise HTTPException(status_code=400, detail="email already exists")
 
     user = User(
-        username=payload.username,
-        email=payload.email,
+        username=username,
+        email=email,
         password_hash=hash_password(payload.password),
         is_admin=False,
+        role="student",
+        school=school,
     )
     db.add(user)
     db.commit()
@@ -57,17 +85,25 @@ def register(payload: UserCreate, db: Session = Depends(get_db)) -> UserResponse
     db.add(setting)
     db.commit()
 
-    return UserResponse(
-        id=user.id,
-        username=user.username,
-        email=user.email,
-        is_admin=user.is_admin,
-    )
+    return _to_user_response(user)
 
 
 @router.post("/login", response_model=TokenResponse)
 def login(payload: LoginRequest, db: Session = Depends(get_db)) -> TokenResponse:
-    user = db.query(User).filter(User.username == payload.username).first()
+    identifier = payload.username.strip()
+    if not identifier:
+        raise HTTPException(status_code=401, detail="invalid credentials")
+
+    user = (
+        db.query(User)
+        .filter(
+            or_(
+                func.lower(User.username) == identifier.lower(),
+                func.lower(User.email) == identifier.lower(),
+            )
+        )
+        .first()
+    )
     if not user or not verify_password(payload.password, user.password_hash):
         raise HTTPException(status_code=401, detail="invalid credentials")
 
@@ -77,14 +113,11 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)) -> TokenResponse
         user_id=user.id,
         username=user.username,
         is_admin=user.is_admin,
+        role=get_user_role(user),
+        school=user.school or "",
     )
 
 
 @router.get("/me", response_model=UserResponse)
 def me(current_user: User = Depends(get_current_user)) -> UserResponse:
-    return UserResponse(
-        id=current_user.id,
-        username=current_user.username,
-        email=current_user.email,
-        is_admin=current_user.is_admin,
-    )
+    return _to_user_response(current_user)

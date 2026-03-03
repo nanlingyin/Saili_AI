@@ -74,6 +74,7 @@ def _fallback_extract(raw: dict[str, Any]) -> tuple[dict[str, Any], str]:
 
     extracted = {
         "title": title,
+        "level": raw.get("level") or "national",
         "description": raw.get("description"),
         "organizer": raw.get("organizer"),
         "location": raw.get("location"),
@@ -302,6 +303,7 @@ def _upsert_competition(
             external_id=f"{source.source_id}:{source_item_id}",
             source=source.source_id,
             title=extracted["title"],
+            level=(extracted.get("level") or "national"),
             status=extracted.get("status") or "pending",
         )
         db.add(competition)
@@ -309,6 +311,7 @@ def _upsert_competition(
 
     competition.source = source.source_id
     competition.title = extracted["title"]
+    competition.level = extracted.get("level") or competition.level or "national"
     competition.description = extracted.get("description")
     competition.organizer = extracted.get("organizer")
     competition.location = extracted.get("location")

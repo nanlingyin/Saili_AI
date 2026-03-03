@@ -1,5 +1,6 @@
 import CompetitionDetailPage from "./pages/CompetitionDetailPage.vue";
 import CompetitionListPage from "./pages/CompetitionListPage.vue";
+import NationalCompetitionsPage from "./pages/NationalCompetitionsPage.vue";
 
 export default {
   name: "competitions",
@@ -8,6 +9,11 @@ export default {
       path: "/competitions",
       name: "competitions",
       component: CompetitionListPage,
+    },
+    {
+      path: "/competitions/national",
+      name: "national-competitions",
+      component: NationalCompetitionsPage,
     },
     {
       path: "/competitions/:id",
@@ -19,6 +25,10 @@ export default {
     {
       path: "/competitions",
       label: "竞赛列表",
+    },
+    {
+      path: "/competitions/national",
+      label: "国家认可",
     },
   ],
 };

@@ -9,7 +9,7 @@
 
       <form @submit.prevent="handleLogin" class="form" style="margin-top: 24px">
         <label class="field">
-          <span class="field-label">用户名</span>
+          <span class="field-label">用户名或邮箱</span>
           <input v-model="form.username" class="input" required />
         </label>
         <label class="field">
@@ -32,11 +32,12 @@
 <script setup>
 import { reactive, ref } from "vue";
 import { useRouter } from "vue-router";
-import { login as apiLogin } from "../api";
+import { useAuthApi } from "../api";
 import { useAuth } from "../../../core/auth-store";
 
 const router = useRouter();
 const { login } = useAuth();
+const { login: apiLogin } = useAuthApi();
 
 const form = reactive({ username: "", password: "" });
 const error = ref("");
@@ -45,8 +46,17 @@ const success = ref("");
 async function handleLogin() {
   error.value = "";
   success.value = "";
+  const username = form.username.trim();
+  if (!username) {
+    error.value = "请输入用户名或邮箱";
+    return;
+  }
+
   try {
-    const data = await apiLogin(form);
+    const data = await apiLogin({
+      username,
+      password: form.password,
+    });
     login(data);
     success.value = "登录成功";
     setTimeout(() => router.push("/"), 600);

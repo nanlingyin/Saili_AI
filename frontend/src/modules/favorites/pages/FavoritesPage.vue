@@ -27,10 +27,11 @@
 
 <script setup>
 import { onMounted, ref } from "vue";
-import { fetchFavorites } from "../api";
+import { useFavoritesApi } from "../api";
 import { useAuth } from "../../../core/auth-store";
 
 const { loggedIn } = useAuth();
+const { fetchFavorites } = useFavoritesApi();
 const items = ref([]);
 
 function formatDate(value) {

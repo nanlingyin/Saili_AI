@@ -11,6 +11,7 @@ export function getMenuItems() {
     if (item.guestOnly && authStore.loggedIn) return false;
     if (item.requiresAuth && !authStore.loggedIn) return false;
     if (item.requiresAdmin && !authStore.isAdmin) return false;
+    if (item.requiresSchoolManager && !authStore.isSchoolManager) return false;
     return true;
   });
 }
